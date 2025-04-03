@@ -1,8 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, AlertCircle, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
-import { connectWallet, ethersState, depositFunds } from '@/utils/ethers';
+import { connectWallet, ethersState, depositFunds, getNetworkName } from '@/utils/ethers';
 import { Input } from "@/components/ui/input";
 import { toast } from "@/utils/toast";
 
@@ -18,6 +19,7 @@ const ConnectWallet: React.FC<ConnectWalletProps> = ({ onConnect }) => {
   const [depositAmount, setDepositAmount] = useState("");
   const [isDepositing, setIsDepositing] = useState(false);
   const [chainId, setChainId] = useState("");
+  const [isLocalNetwork, setIsLocalNetwork] = useState(false);
 
   useEffect(() => {
     // Check if already connected
@@ -27,6 +29,7 @@ const ConnectWallet: React.FC<ConnectWalletProps> = ({ onConnect }) => {
       setBalance(ethersState.balance);
       setL2Balance(ethersState.l2Balance);
       setChainId(ethersState.chainId);
+      setIsLocalNetwork(ethersState.chainId === "31337"); // Hardhat local network
     }
   }, []);
 
@@ -39,6 +42,7 @@ const ConnectWallet: React.FC<ConnectWalletProps> = ({ onConnect }) => {
       setBalance(ethersState.balance);
       setL2Balance(ethersState.l2Balance);
       setChainId(ethersState.chainId);
+      setIsLocalNetwork(ethersState.chainId === "31337"); // Hardhat local network
       
       if (onConnect) {
         onConnect();
@@ -60,22 +64,13 @@ const ConnectWallet: React.FC<ConnectWalletProps> = ({ onConnect }) => {
         setBalance(ethersState.balance);
         setL2Balance(ethersState.l2Balance);
         setDepositAmount("");
+        toast.success(`Successfully deposited ${depositAmount} ETH to Layer 2`);
       }
     } catch (error) {
       console.error("Deposit error:", error);
+      toast.error("Failed to deposit. Check the console for more details.");
     } finally {
       setIsDepositing(false);
-    }
-  };
-
-  const getNetworkName = (chainId: string) => {
-    switch (chainId) {
-      case "11155111":
-        return "Sepolia Testnet";
-      case "1":
-        return "Ethereum Mainnet";
-      default:
-        return "Unknown Network";
     }
   };
 
@@ -112,6 +107,20 @@ const ConnectWallet: React.FC<ConnectWalletProps> = ({ onConnect }) => {
           </div>
         ) : (
           <div className="space-y-4">
+            {isLocalNetwork && (
+              <div className="bg-amber-500/20 border border-amber-500/40 rounded-md p-3 mb-4">
+                <div className="flex items-start">
+                  <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5 mr-2" />
+                  <div>
+                    <h4 className="text-sm font-medium text-amber-400">Development Environment Detected</h4>
+                    <p className="text-xs text-gray-300 mt-1">
+                      You're connected to a local development network. Make sure your contract is deployed at the correct address.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="bg-muted/30 p-3 rounded-lg">
               <p className="text-sm text-muted-foreground mb-1">Connected Account</p>
               <p className="text-base font-medium truncate">{account}</p>

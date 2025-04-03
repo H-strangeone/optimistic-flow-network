@@ -1,73 +1,89 @@
-# Welcome to your Lovable project
 
-## Project info
+# OptiFlo Layer 2 Scaling Solution
 
-**URL**: https://lovable.dev/projects/4f4663a9-a6bc-4ce8-be5f-247ff1ca4fe0
+A Layer 2 scaling solution using Optimistic Rollups with off-chain transaction execution and on-chain state verification.
 
-## How can I edit this code?
+## Project Structure
 
-There are several ways of editing your application.
+- **Frontend**: React + Vite application
+- **Smart Contract**: Solidity contract for the Layer 2 protocol
 
-**Use Lovable**
+## Local Development Setup
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4f4663a9-a6bc-4ce8-be5f-247ff1ca4fe0) and start prompting.
+### Prerequisites
 
-Changes made via Lovable will be committed automatically to this repo.
+1. Node.js (v16+ recommended)
+2. MetaMask browser extension
+3. Hardhat or other Ethereum development environment
 
-**Use your preferred IDE**
+### Smart Contract Setup
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Clone the contract repository (or create a new directory)
+   ```
+   mkdir optiflo-contracts
+   cd optiflo-contracts
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. Initialize a new Hardhat project
+   ```
+   npm init -y
+   npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox
+   npx hardhat init
+   ```
 
-Follow these steps:
+3. Copy your OptiFlo contract to the `contracts` directory
+   ```
+   cp /path/to/OptiFlo.sol ./contracts/
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+4. Deploy the contract locally
+   ```
+   npx hardhat node
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+5. In a new terminal, deploy the contract to the local network
+   ```
+   npx hardhat run scripts/deploy.js --network localhost
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+6. Copy the deployed contract address and update it in `src/utils/ethers.ts`
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+### Frontend Setup
 
-**Edit a file directly in GitHub**
+1. Clone the frontend repository
+   ```
+   git clone <repository-url>
+   cd optiflo-frontend
+   ```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+2. Install dependencies
+   ```
+   npm install
+   ```
 
-**Use GitHub Codespaces**
+3. Start the development server
+   ```
+   npm run dev
+   ```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+4. Open your browser and navigate to `http://localhost:8080`
 
-## What technologies are used for this project?
+## Usage
 
-This project is built with:
+1. Connect your MetaMask to the local Hardhat network (usually http://localhost:8545)
+2. Import one of the test accounts from Hardhat into MetaMask using the private key
+3. Use the application to interact with the Layer 2 solution
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Additional Information
 
-## How can I deploy this project?
+- The contract address is configured in `src/utils/ethers.ts`
+- Local backend API server is expected to run on port 5500
 
-Simply open [Lovable](https://lovable.dev/projects/4f4663a9-a6bc-4ce8-be5f-247ff1ca4fe0) and click on Share -> Publish.
+## Backend Development (Optional)
 
-## Can I connect a custom domain to my Lovable project?
+To fully implement the Layer 2 solution, you'll need a backend server to:
+- Process off-chain transactions
+- Submit batches to the contract
+- Manage the state tree
 
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+A simple Express server can be implemented to handle these operations.

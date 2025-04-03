@@ -21,9 +21,10 @@ const contractABI = [
   "event BatchFinalized(uint256 indexed batchId)",
 ];
 
-// Mock contract address - replace with actual deployed contract on Sepolia
-const L2_CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000";
-const BACKEND_URL = "http://localhost:5500"; // Update with actual backend URL
+// Local development contract address - will be populated after deployment
+// You can replace this with your deployed contract address
+const L2_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Default Hardhat first deployment address
+const BACKEND_URL = "http://localhost:5500"; // Local backend URL
 
 interface Transaction {
   sender: string;
@@ -104,6 +105,7 @@ export const connectWallet = async () => {
       l2Balance = ethers.formatEther(l2BalanceBigInt);
     } catch (error) {
       console.error("Error fetching L2 balance:", error);
+      toast.error("Error connecting to L2 contract. Make sure you're on the correct network and the contract is deployed.");
     }
 
     // Update state
@@ -117,6 +119,14 @@ export const connectWallet = async () => {
     ethersState.isConnected = true;
     
     toast.success("Wallet connected successfully!");
+    
+    // Log connection details for debugging
+    console.log("Connected to network:", getNetworkName(network.chainId.toString()));
+    console.log("Connected account:", account);
+    console.log("L1 Balance:", ethers.formatEther(balance), "ETH");
+    console.log("L2 Balance:", l2Balance, "ETH");
+    console.log("Contract address:", L2_CONTRACT_ADDRESS);
+    
     return true;
   } catch (error) {
     console.error("Error connecting wallet:", error);
@@ -124,6 +134,20 @@ export const connectWallet = async () => {
     return false;
   } finally {
     ethersState.isLoading = false;
+  }
+};
+
+// Get network name helper function
+export const getNetworkName = (chainId: string) => {
+  switch (chainId) {
+    case "11155111":
+      return "Sepolia Testnet";
+    case "1":
+      return "Ethereum Mainnet";
+    case "31337":
+      return "Local Hardhat Network";
+    default:
+      return "Unknown Network";
   }
 };
 
@@ -324,7 +348,7 @@ export const fetchL2Balance = async (account: string) => {
   }
 };
 
-// Fetch batch details
+// Fetch batch details with better error handling
 export const fetchBatchDetails = async (batchId: number): Promise<Batch | null> => {
   if (!ethersState.contract) {
     return null;
@@ -341,6 +365,7 @@ export const fetchBatchDetails = async (batchId: number): Promise<Batch | null> 
     };
   } catch (error) {
     console.error("Error fetching batch details:", error);
+    toast.error("Failed to fetch batch details. Check if the contract is deployed correctly.");
     return null;
   }
 };
