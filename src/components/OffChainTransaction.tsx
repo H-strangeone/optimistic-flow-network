@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from '@/utils/toast';
 import { ethersState, formatAddress } from '@/utils/ethers';
 import { executeOffChainTransaction, getPendingTransactions, createAndSubmitBatch } from '@/services/layer2Service';
+import { ethers } from "ethers";
 
 const OffChainTransaction: React.FC = () => {
   const [recipient, setRecipient] = useState('');
