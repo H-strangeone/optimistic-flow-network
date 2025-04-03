@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, AlertCircle, ArrowDownToLine, ArrowUpFromLine } from 'lucide-react';
 import { connectWallet, ethersState, depositFunds } from '@/utils/ethers';
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/utils/toast";
 
 interface ConnectWalletProps {
   onConnect?: () => void;

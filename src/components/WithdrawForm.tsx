@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowUpFromLine, AlertCircle, CheckCircle } from 'lucide-react';
 import { ethersState, withdrawFunds } from '@/utils/ethers';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/utils/toast";
 
 const WithdrawForm: React.FC = () => {
   const [withdrawAmount, setWithdrawAmount] = useState("");

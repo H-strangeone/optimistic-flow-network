@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Card,
@@ -24,7 +23,7 @@ import {
   reportFraud,
   ethersState
 } from '@/utils/ethers';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/utils/toast";
 
 interface Batch {
   batchId: number;

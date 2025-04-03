@@ -1,6 +1,5 @@
-
 import { ethers } from "ethers";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/utils/toast";
 
 // Layer 2 contract interface
 const contractABI = [
