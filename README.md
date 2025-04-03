@@ -5,8 +5,25 @@ A Layer 2 scaling solution using Optimistic Rollups with off-chain transaction e
 
 ## Project Structure
 
-- **Frontend**: React + Vite application
+- **Frontend**: React + Vite application for user interface
 - **Smart Contract**: Solidity contract for the Layer 2 protocol
+- **Off-Chain Components**: JavaScript service for L2 state management
+
+## Key Components
+
+### On-Chain (Smart Contract)
+- Batch submission mechanism
+- Fraud proof verification
+- Challenge period (1 week)
+- Merkle tree verification
+- Deposit and withdrawal functions
+
+### Off-Chain (JavaScript)
+- Transaction pool management
+- Merkle tree generation
+- Batch creation
+- State persistence
+- Fraud proof generation
 
 ## Local Development Setup
 
@@ -74,16 +91,33 @@ A Layer 2 scaling solution using Optimistic Rollups with off-chain transaction e
 2. Import one of the test accounts from Hardhat into MetaMask using the private key
 3. Use the application to interact with the Layer 2 solution
 
+### Off-Chain Transactions
+
+1. Connect your wallet
+2. Use the "Off-Chain Transaction" component to send L2 transactions
+3. Transactions are stored in a local pending pool
+4. When ready, batch the transactions to submit to the L1 contract
+5. After the challenge period, finalize the batch
+
+### Fraud Proofs
+
+1. Navigate to the Admin page
+2. Select a batch to examine
+3. If fraud is detected, submit a fraud proof with the necessary Merkle proof
+4. The contract will verify and slash the submitter if no fraud is found
+
 ## Additional Information
 
 - The contract address is configured in `src/utils/ethers.ts`
-- Local backend API server is expected to run on port 5500
+- Off-chain state is persisted to localStorage in this demo
+- In production, a proper database and server would be used
 
-## Backend Development (Optional)
+## Layer 2 Architecture
 
-To fully implement the Layer 2 solution, you'll need a backend server to:
-- Process off-chain transactions
-- Submit batches to the contract
-- Manage the state tree
+This implementation follows the Optimistic Rollup pattern:
 
-A simple Express server can be implemented to handle these operations.
+1. Transactions are executed off-chain
+2. Transaction batches are committed to L1 as Merkle roots
+3. A challenge period allows for fraud proofs
+4. After the challenge period, batches are finalized
+5. State transitions are considered final after finalization

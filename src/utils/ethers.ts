@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import { toast } from "@/utils/toast";
+import { getPendingTransactions, getProcessedBatches } from "@/services/layer2Service";
 
 // Layer 2 contract interface
 const contractABI = [
@@ -224,7 +225,7 @@ export const withdrawFunds = async (amount: string) => {
   }
 };
 
-// Submit batch transactions
+// Submit batch transactions using our layer2Service
 export const submitBatchTransactions = async (transactions: Transaction[], rootHash: string) => {
   if (!ethersState.contract || !ethersState.signer) {
     toast.error("Wallet not connected");
@@ -238,24 +239,6 @@ export const submitBatchTransactions = async (transactions: Transaction[], rootH
     
     const receipt = await tx.wait();
     toast.success("Batch submitted successfully!");
-
-    // Also submit the transactions to our backend
-    try {
-      const response = await fetch(`${BACKEND_URL}/batch`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ transactions, rootHash }),
-      });
-      
-      if (!response.ok) {
-        toast.error("Failed to submit transactions to backend");
-      }
-    } catch (backendError) {
-      console.error("Backend error:", backendError);
-      toast.error("Failed to sync with backend. Some features may be limited.");
-    }
     
     return receipt;
   } catch (error) {
@@ -370,22 +353,60 @@ export const fetchBatchDetails = async (batchId: number): Promise<Batch | null> 
   }
 };
 
-// Fetch transactions from backend (these would be off-chain)
+// Fetch transactions from our layer2Service
 export const fetchTransactions = async (): Promise<BatchTransaction[]> => {
   if (!ethersState.account) {
     return [];
   }
   
   try {
-    const response = await fetch(`${BACKEND_URL}/transactions?address=${ethersState.account}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch transactions');
-    }
-    return await response.json();
+    // Get transactions from our layer2Service
+    const pendingTxs = getPendingTransactions();
+    const batches = getProcessedBatches();
+    
+    const result: BatchTransaction[] = [];
+    
+    // Add pending transactions
+    pendingTxs.forEach((tx, index) => {
+      if (tx.sender === ethersState.account || tx.recipient === ethersState.account) {
+        result.push({
+          id: `pending-${index}`,
+          sender: tx.sender,
+          recipient: tx.recipient,
+          amount: tx.amount,
+          timestamp: Date.now() - (index * 60000), // Fake timestamps for demo
+          status: "pending",
+        });
+      }
+    });
+    
+    // Add batch transactions
+    batches.forEach(batch => {
+      batch.transactions.forEach((tx, index) => {
+        if (tx.sender === ethersState.account || tx.recipient === ethersState.account) {
+          result.push({
+            id: `batch-${batch.batchId}-${index}`,
+            sender: tx.sender,
+            recipient: tx.recipient,
+            amount: tx.amount,
+            timestamp: batch.timestamp - (index * 1000),
+            status: batch.status === "pending" ? "pending" : 
+                   batch.status === "verified" ? "verified" : 
+                   batch.status === "finalized" ? "finalized" : "failed",
+            batchId: batch.batchId
+          });
+        }
+      });
+    });
+    
+    // Sort by timestamp (newest first)
+    result.sort((a, b) => b.timestamp - a.timestamp);
+    
+    return result;
   } catch (error) {
     console.error("Error fetching transactions:", error);
     
-    // Return mock data if backend is not available
+    // Return mock data if layer2Service is not available
     return [
       {
         id: "0x123",
@@ -409,18 +430,22 @@ export const fetchTransactions = async (): Promise<BatchTransaction[]> => {
   }
 };
 
-// Fetch all batches from backend
-export const fetchBatches = async (): Promise<Batch[]> => {
+// Fetch all batches from our layer2Service
+export const fetchBatches = async () => {
   try {
-    const response = await fetch(`${BACKEND_URL}/batches`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch batches');
-    }
-    return await response.json();
+    const batches = getProcessedBatches();
+    
+    return batches.map(batch => ({
+      batchId: batch.batchId,
+      transactionsRoot: batch.root,
+      timestamp: batch.timestamp,
+      verified: batch.status === "verified" || batch.status === "finalized",
+      finalized: batch.status === "finalized"
+    }));
   } catch (error) {
     console.error("Error fetching batches:", error);
     
-    // Return mock data if backend is not available
+    // Return mock data if layer2Service is not available
     return [
       {
         batchId: 1,

@@ -4,7 +4,9 @@ import { Zap, Layers, Shield } from 'lucide-react';
 import ConnectWallet from '@/components/ConnectWallet';
 import BatchSubmission from '@/components/BatchSubmission';
 import TransactionTracker from '@/components/TransactionTracker';
+import OffChainTransaction from '@/components/OffChainTransaction';
 import { ethersState, setupEventListeners } from '@/utils/ethers';
+import { initializeLayer2Service } from '@/services/layer2Service';
 
 const Index: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -12,6 +14,9 @@ const Index: React.FC = () => {
   useEffect(() => {
     // Set up event listeners for MetaMask
     setupEventListeners();
+    
+    // Initialize Layer 2 service
+    initializeLayer2Service();
     
     // Check if already connected
     setIsConnected(ethersState.isConnected);
@@ -69,7 +74,11 @@ const Index: React.FC = () => {
         </div>
         
         <div>
-          <BatchSubmission />
+          {isConnected ? (
+            <OffChainTransaction />
+          ) : (
+            <BatchSubmission />
+          )}
         </div>
       </div>
 
